@@ -188,7 +188,7 @@ addLine(dataUser) {
                     <td>${Utils.dateFormat(dataUser.register)}</td>
                     <td>
                       <button type="button" class="btn btn-primary btn-xs btn-edit btn-flat">Editar</button>
-                      <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
+                      <button type="button" class="btn btn-danger btn-delete btn-xs btn-flat">Excluir</button>
                     </td> 
          `
 
@@ -200,6 +200,13 @@ addLine(dataUser) {
 }
 
 addEventsTr(tr) {
+
+     tr.querySelector(".btn-delete").addEventListener("click", e => {
+        if(confirm("Deseja realmente excluir?")) {
+            tr.remove()
+            this.updateCount()}  //quando apertar no botao delete, ele remove a linha e atualiza a contagem
+            
+     })
 
     tr.querySelector(".btn-edit").addEventListener("click", e => {
         let json = JSON.parse(tr.dataset.user)
