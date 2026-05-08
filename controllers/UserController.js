@@ -133,7 +133,19 @@ class UserController {
          `
 
         tr.querySelector(".btn-edit").addEventListener("click", e => {
-            console.log(JSON.parse(tr.dataset.user))
+            let json = JSON.parse(tr.dataset.user)
+            let form = document.querySelector("#form-user-update")
+
+            for (let name in json) {
+                let field = form.querySelector("[name= " + name.replace("_", "") + "]")
+                
+                if (field) {
+                    if (field.type == "file") continue
+
+                    field.value = json[name]
+                } //for para quando apertar no botao editar, ele puxar os valores do usuario para edicao
+            }
+
             this.showPanelUpdate()
         }) //quando aperta no botao editar, ele troca o formulario para o de edicao
 
