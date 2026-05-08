@@ -1,1 +1,3 @@
-alert("Hello World")
+var nome = document.querySelector("#exampleInputName")
+
+nome.value = "Oi"
