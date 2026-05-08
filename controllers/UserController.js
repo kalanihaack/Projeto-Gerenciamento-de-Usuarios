@@ -8,6 +8,7 @@ class UserController {
 
         this.onSubmit()
         this.onEdit()
+        this.selectAll()
 
     }
 
@@ -53,7 +54,7 @@ class UserController {
                     <td>${Utils.dateFormat(result._register)}</td>
                     <td>
                       <button type="button" class="btn btn-primary btn-xs btn-edit btn-flat">Editar</button>
-                      <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
+                      <button type="button" class="btn btn-danger btn-delete btn-xs btn-flat">Excluir</button>
                     </td> 
          `
 
@@ -91,7 +92,8 @@ onSubmit() {
         this.getPhoto(this.formEl).then((content) => {
 
             values.photo = content
-            this.addLine(values)
+            this.insert(values)
+            this.addLine(values) //cria a linha com os dados do usuario
             this.formEl.reset()
             btn.disabled = false //quando faz o envio do formulario, ele limpa os campos e reabilita o botao para submit
 
@@ -172,6 +174,49 @@ getValues(formEl) {
     return new User(user.name, user.gender, user.birth, user.country, user.email, user.password, user.photo, user.admin)
 } // foreach para pegar as informacoes escrita pelo usuario nas boxes
 
+
+getUsersStorage(){
+    
+    let users = []
+
+    if(sessionStorage.getItem("users")) {
+
+        users = JSON.parse(sessionStorage.getItem("users"))
+
+    }
+
+    return users //funcao que carrega os usuarios na sessao
+
+}
+
+
+selectAll(){
+       
+    let users = this.getUsersStorage() 
+
+
+
+    users.forEach(dataUser=>{
+
+        let user = new User()
+        
+        user.loadFromJSON(dataUser)
+
+        this.addLine(user) //foreach para percorrer todos os usuarios do json
+    })
+
+}
+
+
+
+insert(data) {
+
+    let users = this.getUsersStorage()
+
+    users.push(data) //push para adicionar ao final do array 
+
+    sessionStorage.setItem("users", JSON.stringify(users)) //cria uma tabela usando sessionstorage para armazenar os usuarios no navegador 
+}
 
 addLine(dataUser) {
 
