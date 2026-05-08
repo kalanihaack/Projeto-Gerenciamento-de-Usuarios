@@ -17,7 +17,7 @@ class UserController {
             this.showPanelCreate() //quando apertar no botao de cancelar no formulario de editar, ele retorna para o formulario de novo usuario
         })
 
-        this.formUpdateEl.addEventListener("submit", event => { 
+        this.formUpdateEl.addEventListener("submit", event => {
 
             event.preventDefault()
 
@@ -37,28 +37,16 @@ class UserController {
 
             this.getPhoto(this.formUpdateEl).then((content) => {
 
-                if(!values.photo) {
+                if (!values.photo) {
                     result._photo = userOld._photo
                 } else {
                     result._photo = content //se o resultado da foto for vazio no formulario de edicao, ele usa a foto antiga
                 }
 
-                tr.dataset.user = JSON.stringify(result)
+                let user = new User()
+                user.loadFromJSON(result)
 
-                tr.innerHTML =
-                    `
-                    <td><img src="${result._photo}" alt="User Image" class="img-circle img-sm"></td>
-                    <td>${result._name}</td>
-                    <td>${result._email}</td>
-                    <td>${(result._admin) ? "Sim" : "Não"}</td>
-                    <td>${Utils.dateFormat(result._register)}</td>
-                    <td>
-                      <button type="button" class="btn btn-primary btn-xs btn-edit btn-flat">Editar</button>
-                      <button type="button" class="btn btn-danger btn-delete btn-xs btn-flat">Excluir</button>
-                    </td> 
-         `
-
-                this.addEventsTr(tr)
+                this.getTr(user, tr)
 
                 this.updateCount()
 
@@ -77,156 +65,165 @@ class UserController {
 
     }
 
-onSubmit() {
+    onSubmit() {
 
-    this.formEl.addEventListener("submit", event => {
+        this.formEl.addEventListener("submit", event => {
 
-        event.preventDefault()
+            event.preventDefault()
 
-        let btn = this.formEl.querySelector("[type=submit]")
+            let btn = this.formEl.querySelector("[type=submit]")
 
-        btn.disabled = true
+            btn.disabled = true
 
-        let values = this.getValues(this.formEl)
+            let values = this.getValues(this.formEl)
 
-        this.getPhoto(this.formEl).then((content) => {
+            this.getPhoto(this.formEl).then((content) => {
 
-            values.photo = content
-            this.insert(values)
-            this.addLine(values) //cria a linha com os dados do usuario
-            this.formEl.reset()
-            btn.disabled = false //quando faz o envio do formulario, ele limpa os campos e reabilita o botao para submit
-
-
-        }, (e) => {
-            console.error(e)
-
-        })
-    }) //funcao para fazer o click que envia o formulario
-
-}
-
-getPhoto(formEl) {
-
-    return new Promise((resolve, reject) => {
-
-        let fileReader = new FileReader()
-
-        let elements = Array.from(formEl.elements).filter(item => {
-
-            if (item.name === "photo") {
-                return item  //obriga a adicao de uma foto
-            }
-        })
-
-        let file = elements[0].files[0]
-
-        fileReader.onload = () => {
-            resolve(fileReader.result)
-        }
-
-        fileReader.onerror = (e) => {
-            reject(e) //retorna erro a partir do promise
-        }
+                values.photo = content
+                this.insert(values)
+                this.addLine(values) //cria a linha com os dados do usuario
+                this.formEl.reset()
+                btn.disabled = false //quando faz o envio do formulario, ele limpa os campos e reabilita o botao para submit
 
 
-        if (file) {
-            fileReader.readAsDataURL(file)  //para nao retornar erro no console
-        } else {
-            resolve('dist/img/boxed-bg.jpg')
-        }
-    })
+            }, (e) => {
+                console.error(e)
 
-}
-
-
-
-getValues(formEl) {
-
-    let user = {}
-    let isValid = true //valida se os valores estao validos
-
-    Array.from(formEl.elements).forEach(function (field, index) { //usando array.from para substituir o spread (transformar em array)
-
-        if (["name", "email", "password"].indexOf(field.name) > -1 && !field.value) { //obriga o preenchimento de nome, email e senha
-            field.parentElement.classList.add("has-error")
-            isValid = false //se nao passar na validacao, retorna erro e nao deixa avancar
-        }
-
-        if (field.name == "gender") {
-
-            if (field.checked) {
-                user[field.name] = field.value //retorna qual genero esta marcado
-            }
-
-        } else if (field.name == "admin") {
-            user[field.name] = field.checked
-        } else {
-            user[field.name] = field.value //mostra se a box de admin esta marcada ou nao
-        }
-
-    })
-
-    if (!isValid) {
-        return false
-    }
-
-    return new User(user.name, user.gender, user.birth, user.country, user.email, user.password, user.photo, user.admin)
-} // foreach para pegar as informacoes escrita pelo usuario nas boxes
-
-
-getUsersStorage(){
-    
-    let users = []
-
-    if(localStorage.getItem("users")) {
-
-        users = JSON.parse(localStorage.getItem("users"))
+            })
+        }) //funcao para fazer o click que envia o formulario
 
     }
 
-    return users //funcao que carrega os usuarios na sessao
+    getPhoto(formEl) {
 
-}
+        return new Promise((resolve, reject) => {
+
+            let fileReader = new FileReader()
+
+            let elements = Array.from(formEl.elements).filter(item => {
+
+                if (item.name === "photo") {
+                    return item  //obriga a adicao de uma foto
+                }
+            })
+
+            let file = elements[0].files[0]
+
+            fileReader.onload = () => {
+                resolve(fileReader.result)
+            }
+
+            fileReader.onerror = (e) => {
+                reject(e) //retorna erro a partir do promise
+            }
 
 
-selectAll(){
-       
-    let users = this.getUsersStorage() 
+            if (file) {
+                fileReader.readAsDataURL(file)  //para nao retornar erro no console
+            } else {
+                resolve('dist/img/boxed-bg.jpg')
+            }
+        })
+
+    }
 
 
 
-    users.forEach(dataUser=>{
+    getValues(formEl) {
 
-        let user = new User()
-        
-        user.loadFromJSON(dataUser)
+        let user = {}
+        let isValid = true //valida se os valores estao validos
 
-        this.addLine(user) //foreach para percorrer todos os usuarios do json
-    })
+        Array.from(formEl.elements).forEach(function (field, index) { //usando array.from para substituir o spread (transformar em array)
 
-}
+            if (["name", "email", "password"].indexOf(field.name) > -1 && !field.value) { //obriga o preenchimento de nome, email e senha
+                field.parentElement.classList.add("has-error")
+                isValid = false //se nao passar na validacao, retorna erro e nao deixa avancar
+            }
+
+            if (field.name == "gender") {
+
+                if (field.checked) {
+                    user[field.name] = field.value //retorna qual genero esta marcado
+                }
+
+            } else if (field.name == "admin") {
+                user[field.name] = field.checked
+            } else {
+                user[field.name] = field.value //mostra se a box de admin esta marcada ou nao
+            }
+
+        })
+
+        if (!isValid) {
+            return false
+        }
+
+        return new User(user.name, user.gender, user.birth, user.country, user.email, user.password, user.photo, user.admin)
+    } // foreach para pegar as informacoes escrita pelo usuario nas boxes
+
+
+    getUsersStorage() {
+
+        let users = []
+
+        if (localStorage.getItem("users")) {
+
+            users = JSON.parse(localStorage.getItem("users"))
+
+        }
+
+        return users //funcao que carrega os usuarios na sessao
+
+    }
+
+
+    selectAll() {
+
+        let users = this.getUsersStorage()
 
 
 
-insert(data) {
+        users.forEach(dataUser => {
 
-    let users = this.getUsersStorage()
+            let user = new User()
 
-    users.push(data) //push para adicionar ao final do array 
+            user.loadFromJSON(dataUser)
 
-    //localStorage.setItem("users", JSON.stringify(users)) //cria uma tabela usando localStorage para armazenar os usuarios no navegador 
-    localStorage.setItem("users", JSON.stringify(users)) //cria uma tabela usando localStorage
-}
+            this.addLine(user) //foreach para percorrer todos os usuarios do json
+        })
 
-addLine(dataUser) {
+    }
 
-    let tr = document.createElement("tr")
 
-    tr.dataset.user = JSON.stringify(dataUser)
 
-    tr.innerHTML =
-        `
+    insert(data) {
+
+        let users = this.getUsersStorage()
+
+        users.push(data) //push para adicionar ao final do array 
+
+        //localStorage.setItem("users", JSON.stringify(users)) //cria uma tabela usando localStorage para armazenar os usuarios no navegador 
+        localStorage.setItem("users", JSON.stringify(users)) //cria uma tabela usando localStorage
+    }
+
+    addLine(dataUser) {
+
+        let tr = this.getTr(dataUser)
+
+        this.tableEl.appendChild(tr) //permite adicionar mais de um usuario na listagem, e retorna se o admin é sim ou nao
+
+        this.updateCount()
+    }
+
+    getTr(dataUser, tr = null) {
+
+        if (tr === null) tr = document.createElement("tr")
+
+        tr.dataset.user = JSON.stringify(dataUser)
+
+        tr.innerHTML =
+            `
                     <td><img src="${dataUser.photo}" alt="User Image" class="img-circle img-sm"></td>
                     <td>${dataUser.name}</td>
                     <td>${dataUser.email}</td>
@@ -238,87 +235,86 @@ addLine(dataUser) {
                     </td> 
          `
 
-    this.addEventsTr(tr)
+        this.addEventsTr(tr)
+        return tr //criamos uma funcao para ao inves de ter que digitar o html sempre, ele ja fazer todo processo no getTr
 
-    this.tableEl.appendChild(tr) //permite adicionar mais de um usuario na listagem, e retorna se o admin é sim ou nao
+    }
 
-    this.updateCount()
-}
+    addEventsTr(tr) {
 
-addEventsTr(tr) {
+        tr.querySelector(".btn-delete").addEventListener("click", e => {
+            if (confirm("Deseja realmente excluir?")) {
+                tr.remove()
+                this.updateCount()
+            }  //quando apertar no botao delete, ele remove a linha e atualiza a contagem
 
-     tr.querySelector(".btn-delete").addEventListener("click", e => {
-        if(confirm("Deseja realmente excluir?")) {
-            tr.remove()
-            this.updateCount()}  //quando apertar no botao delete, ele remove a linha e atualiza a contagem
-            
-     })
+        })
 
-    tr.querySelector(".btn-edit").addEventListener("click", e => {
-        let json = JSON.parse(tr.dataset.user)
+        tr.querySelector(".btn-edit").addEventListener("click", e => {
+            let json = JSON.parse(tr.dataset.user)
 
-        this.formUpdateEl.dataset.trIndex = tr.sectionRowIndex
+            this.formUpdateEl.dataset.trIndex = tr.sectionRowIndex
 
-        for (let name in json) {
-            let field = this.formUpdateEl.querySelector("[name= " + name.replace("_", "") + "]")
+            for (let name in json) {
+                let field = this.formUpdateEl.querySelector("[name= " + name.replace("_", "") + "]")
 
-            if (field) {
-                if (field.type == "file") continue
+                if (field) {
+                    if (field.type == "file") continue
 
-                switch (field.type) {
-                    case "file":
-                        continue
-                        break
+                    switch (field.type) {
+                        case "file":
+                            continue
+                            break
 
-                    case "radio":
-                        field = this.formUpdateEl.querySelector("[name=" + name.replace("_", "") + "][value=" + json[name] + "]")
-                        field.checked = true
-                        break
+                        case "radio":
+                            field = this.formUpdateEl.querySelector("[name=" + name.replace("_", "") + "][value=" + json[name] + "]")
+                            field.checked = true
+                            break
 
-                    case "checkbox":
-                        field.checked = json[name]
-                        break
+                        case "checkbox":
+                            field.checked = json[name]
+                            break
 
-                    default:
-                        field.value = json[name]
-                }
+                        default:
+                            field.value = json[name]
+                    }
 
-            } //for para quando apertar no botao editar, ele puxar os valores do usuario para edicao
-        }
+                } //for para quando apertar no botao editar, ele puxar os valores do usuario para edicao
+            }
 
-        this.formUpdateEl.querySelector(".photo").src = json._photo
+            this.formUpdateEl.querySelector(".photo").src = json._photo
 
-        this.showPanelUpdate()
-    }) //quando aperta no botao editar, ele troca o formulario para o de edicao
-}
+            this.showPanelUpdate()
+        }) //quando aperta no botao editar, ele troca o formulario para o de edicao
+    }
 
-showPanelCreate() {
-    document.querySelector("#box-user-create").style.display = "block"
-    document.querySelector("#box-user-update").style.display = "none"
-} //mostra o painel de criar usuario e esconde o de edicao
+    showPanelCreate() {
+        document.querySelector("#box-user-create").style.display = "block"
+        document.querySelector("#box-user-update").style.display = "none"
+    } //mostra o painel de criar usuario e esconde o de edicao
 
-showPanelUpdate() {
-    document.querySelector("#box-user-create").style.display = "none"
-    document.querySelector("#box-user-update").style.display = "block"
-} //mostra o painel de edicao e esconde o de criar
+    showPanelUpdate() {
+        document.querySelector("#box-user-create").style.display = "none"
+        document.querySelector("#box-user-update").style.display = "block"
+    } //mostra o painel de edicao e esconde o de criar
 
-updateCount() {
+    updateCount() {
 
-    let numberUsers = 0
-    let numberAdmin = 0
+        let numberUsers = 0
+        let numberAdmin = 0
 
-    Array.from(this.tableEl.children).forEach(tr => {
+        Array.from(this.tableEl.children).forEach(tr => {
 
-        numberUsers++
+            numberUsers++
 
-        let user = JSON.parse(tr.dataset.user)
+            let user = JSON.parse(tr.dataset.user)
 
-        if (user._admin) numberAdmin++
+            if (user._admin) numberAdmin++
 
 
-    })
+        })
 
-    document.querySelector("#number-users").innerHTML = numberUsers
-    document.querySelector("#number-users-admin").innerHTML = numberAdmin
-}
+        document.querySelector("#number-users").innerHTML = numberUsers
+        document.querySelector("#number-users-admin").innerHTML = numberAdmin
+    }
 } //funcao que pega o array e atualiza as tabelas do html (contador de usuarios e administradores)
