@@ -17,40 +17,48 @@ class UserController {
 
             let values = this.getValues()
 
-            values.photo = ""
+            this.getPhoto().then((content)=>{
 
-            this.getPhoto((content)=>{
-                
                 values.photo = content
                 this.addLine(values)
                 
-            })
 
+            }, (e)=>{
+                console.error(e)
 
-
+            }) 
         }) //funcao para fazer o click que envia o formulario
 
     }
 
-    getPhoto(callback){
+    getPhoto() {
 
-        let fileReader = new FileReader()
+        return new Promise((resolve, reject)=>{
 
-        let elements = Array.from(this.formEl.elements).filter(item=>{
-            
-            if (item.name === "photo") {
-                return item  //obriga a adicao de uma foto
+            let fileReader = new FileReader()
+
+            let elements = Array.from(this.formEl.elements).filter(item => {
+
+                if (item.name === "photo") {
+                    return item  //obriga a adicao de uma foto
+                }
+            })
+
+            let file = elements[0].files[0]
+
+            fileReader.onload = () => {
+                resolve(fileReader.result)
             }
+
+            fileReader.onerror = (e)=>{
+                reject(e) //retorna erro a partir do promise
+            }
+            fileReader.readAsDataURL(file) //para nao retornar erro no console
         })
 
-        let file = elements[0].files[0]
-
-        fileReader.onload = ()=>{
-            callback(fileReader.result) 
         }
-        
-        fileReader.readAsDataURL(file) //para nao retornar erro no console
-    }
+
+
 
     getValues() {
 
@@ -77,8 +85,8 @@ class UserController {
 
         console.log(dataUser)
 
-         this.tableEl.innerHTML =
-        `
+        this.tableEl.innerHTML =
+            `
         <tr>
                     <td><img src="${dataUser.photo}" alt="User Image" class="img-circle img-sm"></td>
                     <td>${dataUser.name}</td>
@@ -91,5 +99,5 @@ class UserController {
                     </td>
         </tr>
          `
-}
+    }
 }
