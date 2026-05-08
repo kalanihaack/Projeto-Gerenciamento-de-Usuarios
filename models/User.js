@@ -108,8 +108,8 @@ class User {
         if (this.id > 0) {
 
             users.map(u => {
-                if (u._id === this.id) {
-                    u = this 
+                if (u._id == this.id) {
+                    Object.assign(u, this) //valida o u com o this para fazer as alteracoes
                 }
 
                 return u //array map para verificar id por id ate chegar no que precisa ser alterado, e ai executa a mudanca
