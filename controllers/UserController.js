@@ -164,26 +164,9 @@ class UserController {
     } // foreach para pegar as informacoes escrita pelo usuario nas boxes
 
 
-    getUsersStorage() {
-
-        let users = []
-
-        if (localStorage.getItem("users")) {
-
-            users = JSON.parse(localStorage.getItem("users"))
-
-        }
-
-        return users //funcao que carrega os usuarios na sessao
-
-    }
-
-
     selectAll() {
 
-        let users = this.getUsersStorage()
-
-
+        let users = User.getUsersStorage()
 
         users.forEach(dataUser => {
 
@@ -233,6 +216,13 @@ class UserController {
 
         tr.querySelector(".btn-delete").addEventListener("click", e => {
             if (confirm("Deseja realmente excluir?")) {
+
+                let user = new User()
+
+                user.loadFromJSON(JSON.parse(tr.dataset.user))
+
+                user.remove()
+
                 tr.remove()
                 this.updateCount()
             }  //quando apertar no botao delete, ele remove a linha e atualiza a contagem

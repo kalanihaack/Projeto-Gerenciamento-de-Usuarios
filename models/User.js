@@ -95,11 +95,16 @@ class User {
     }
 
     getNewID() {
-        if (!window.id) window.id = 0
 
-        id++
+        let usersID = parseInt(localStorage.getItem("usersID"))
 
-        return id //cria um id a partir de zero com escopo global
+        if (!usersID > 0) usersID = 0
+
+        usersID++
+
+        localStorage.setItem("usersID", usersID)
+
+        return usersID //cria um id a partir de zero com escopo global
     }
 
     save() {
@@ -120,8 +125,22 @@ class User {
 
             users.push(this) //push para adicionar ao final do array 
 
-        }
+        }}
+
+ 
+
+        remove(){
+
+            let users = User.getUsersStorage()
+
+            users.forEach((userData, index)=>{
+
+                if (this._id == userData._id) {
+                    users.splice(index, 1) 
+                }
+            }) //remove o usuario do id localizado no localstorage
 
         localStorage.setItem("users", JSON.stringify(users)) //cria uma tabela usando localStorage
+
+        }
     }
-}
