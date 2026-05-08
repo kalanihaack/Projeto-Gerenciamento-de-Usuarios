@@ -179,9 +179,9 @@ getUsersStorage(){
     
     let users = []
 
-    if(sessionStorage.getItem("users")) {
+    if(localStorage.getItem("users")) {
 
-        users = JSON.parse(sessionStorage.getItem("users"))
+        users = JSON.parse(localStorage.getItem("users"))
 
     }
 
@@ -215,7 +215,8 @@ insert(data) {
 
     users.push(data) //push para adicionar ao final do array 
 
-    sessionStorage.setItem("users", JSON.stringify(users)) //cria uma tabela usando sessionstorage para armazenar os usuarios no navegador 
+    //localStorage.setItem("users", JSON.stringify(users)) //cria uma tabela usando localStorage para armazenar os usuarios no navegador 
+    localStorage.setItem("users", JSON.stringify(users)) //cria uma tabela usando localStorage
 }
 
 addLine(dataUser) {
