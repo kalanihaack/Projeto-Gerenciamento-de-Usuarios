@@ -45,6 +45,7 @@ class UserController {
 
                 let user = new User()
                 user.loadFromJSON(result)
+                user.save() //cria o usuario, carrega no json, e salva ele 
 
                 this.getTr(user, tr)
 
@@ -80,7 +81,7 @@ class UserController {
             this.getPhoto(this.formEl).then((content) => {
 
                 values.photo = content
-                this.insert(values)
+                values.save()
                 this.addLine(values) //cria a linha com os dados do usuario
                 this.formEl.reset()
                 btn.disabled = false //quando faz o envio do formulario, ele limpa os campos e reabilita o botao para submit
@@ -193,18 +194,6 @@ class UserController {
             this.addLine(user) //foreach para percorrer todos os usuarios do json
         })
 
-    }
-
-
-
-    insert(data) {
-
-        let users = this.getUsersStorage()
-
-        users.push(data) //push para adicionar ao final do array 
-
-        //localStorage.setItem("users", JSON.stringify(users)) //cria uma tabela usando localStorage para armazenar os usuarios no navegador 
-        localStorage.setItem("users", JSON.stringify(users)) //cria uma tabela usando localStorage
     }
 
     addLine(dataUser) {

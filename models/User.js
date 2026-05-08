@@ -1,7 +1,8 @@
-class User{
+class User {
 
-    constructor(name, gender, birth, country, email, password, photo, admin){
+    constructor(name, gender, birth, country, email, password, photo, admin) {
 
+        this._id
         this._name = name
         this._gender = gender
         this._birth = birth
@@ -13,66 +14,114 @@ class User{
         this._register = new Date()
     }
 
-    get register(){
+    get id() {
+        return this._id
+    }
+
+    get register() {
         return this._register
     }
 
-    get name(){
+    get name() {
         return this._name
     }
 
-    
-    get gender(){
+
+    get gender() {
         return this._gender
     }
 
-    
-    get birth(){
+
+    get birth() {
         return this._birth
     }
 
-    
-    get country(){
+
+    get country() {
         return this._country
     }
 
-    
-    get email(){
+
+    get email() {
         return this._email
     }
 
-    
-    get password(){
+
+    get password() {
         return this._password
     }
 
-    
-    get photo(){
+
+    get photo() {
         return this._photo
     }
 
-    
-    get admin(){
+
+    get admin() {
         return this._admin
     }
 
-    set photo(value){
+    set photo(value) {
         this._photo = value
     }
 
-    loadFromJSON(json){
+    loadFromJSON(json) {
         for (let name in json) {
 
-            switch(name){
-                case  "_register":
+            switch (name) {
+                case "_register":
                     this[name] = new Date(json[name])
-                break
+                    break
 
-            default:
-                this[name] = json[name]
+                default:
+                    this[name] = json[name]
             }
 
         }
     }
 
+    static getUsersStorage() {
+
+        let users = []
+
+        if (localStorage.getItem("users")) {
+
+            users = JSON.parse(localStorage.getItem("users"))
+
+        }
+
+        return users //funcao que carrega os usuarios na sessao
+
+    }
+
+    getNewID() {
+        if (!window.id) window.id = 0
+
+        id++
+
+        return id //cria um id a partir de zero com escopo global
+    }
+
+    save() {
+        let users = User.getUsersStorage()
+
+        if (this.id > 0) {
+
+            users.map(u => {
+                if (u._id === this.id) {
+                    u = this 
+                }
+
+                return u //array map para verificar id por id ate chegar no que precisa ser alterado, e ai executa a mudanca
+            })
+
+        } else {
+            this._id = this.getNewID() //se nao for igual, cria um novo id
+
+            users.push(this) //push para adicionar ao final do array 
+
+        }
+
+        localStorage.setItem("users", JSON.stringify(users)) //cria uma tabela usando localStorage
+    }
 }
