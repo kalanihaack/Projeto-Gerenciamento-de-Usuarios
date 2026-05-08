@@ -1,18 +1,52 @@
 class UserController {
 
-    constructor(formId, tableId) {
+    constructor(formIdCreate, formIdUpdate, tableId) {
 
-        this.formEl = document.getElementById(formId)
+        this.formEl = document.getElementById(formIdCreate)
+        this.formUpdateEl = document.getElementById(formIdUpdate)
         this.tableEl = document.getElementById(tableId)
 
         this.onSubmit()
-        this.onEditCancel()
+        this.onEdit()
 
     }
 
-    onEditCancel() {
+    onEdit() {
         document.querySelector("#box-user-update .btn-cancel").addEventListener("click", e => {
             this.showPanelCreate() //quando apertar no botao de cancelar no formulario de editar, ele retorna para o formulario de novo usuario
+        })
+
+        this.formUpdateEl.addEventListener("submit", event => {
+
+            event.preventDefault()
+
+            let btn = this.formUpdateEl.querySelector("[type=submit]")
+
+            btn.disabled = true
+
+            let values = this.getValues(this.formUpdateEl) //quando o usuario apertar em editar, trocar as informacoes, e apertar em salvar, ele envia um novo json
+
+            let index = this.formUpdateEl.dataset.trIndex
+
+            let tr = this.tableEl.rows[index]
+
+            tr.dataset.user = JSON.stringify(values) q  
+
+            tr.innerHTML =
+                `
+                    <td><img src="${values.photo}" alt="User Image" class="img-circle img-sm"></td>
+                    <td>${values.name}</td>
+                    <td>${values.email}</td>
+                    <td>${(values.admin) ? "Sim" : "Não"}</td>
+                    <td>${Utils.dateFormat(values.register)}</td>
+                    <td>
+                      <button type="button" class="btn btn-primary btn-xs btn-edit btn-flat">Editar</button>
+                      <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
+                    </td> 
+         `
+
+         this.addEventsTr(tr)
+         this.updateCount()
         })
     }
 
@@ -26,7 +60,7 @@ class UserController {
 
             btn.disabled = true
 
-            let values = this.getValues()
+            let values = this.getValues(this.formEl)
 
             this.getPhoto().then((content) => {
 
@@ -79,12 +113,12 @@ class UserController {
 
 
 
-    getValues() {
+    getValues(formEl) {
 
         let user = {}
         let isValid = true //valida se os valores estao validos
 
-        Array.from(this.formEl.elements).forEach(function (field, index) { //usando array.from para substituir o spread (transformar em array)
+        Array.from(formEl.elements).forEach(function (field, index) { //usando array.from para substituir o spread (transformar em array)
 
             if (["name", "email", "password"].indexOf(field.name) > -1 && !field.value) { //obriga o preenchimento de nome, email e senha
                 field.parentElement.classList.add("has-error")
@@ -132,17 +166,27 @@ class UserController {
                     </td> 
          `
 
-        tr.querySelector(".btn-edit").addEventListener("click", e => {
+        this.addEventsTr(tr)
+
+        this.tableEl.appendChild(tr) //permite adicionar mais de um usuario na listagem, e retorna se o admin é sim ou nao
+
+        this.updateCount()
+    }
+
+    addEventsTr(tr){
+                tr.querySelector(".btn-edit").addEventListener("click", e => {
             let json = JSON.parse(tr.dataset.user)
             let form = document.querySelector("#form-user-update")
 
+            form.dataset.trIndex = tr.sectionRowIndex
+
             for (let name in json) {
                 let field = form.querySelector("[name= " + name.replace("_", "") + "]")
-                
+
                 if (field) {
                     if (field.type == "file") continue
 
-                    switch(field.type) {
+                    switch (field.type) {
                         case "file":
                             continue
                             break
@@ -151,30 +195,25 @@ class UserController {
                             field = form.querySelector("[name=" + name.replace("_", "") + "][value=" + json[name] + "]")
                             field.checked = true
                             break
-                            
+
                         case "checkbox":
                             field.checked = json[name]
-                        break
-                        
+                            break
+
                         default:
                             field.value = json[name]
                     }
 
-                    field.value = json[name]
                 } //for para quando apertar no botao editar, ele puxar os valores do usuario para edicao
             }
 
             this.showPanelUpdate()
         }) //quando aperta no botao editar, ele troca o formulario para o de edicao
-
-        this.tableEl.appendChild(tr) //permite adicionar mais de um usuario na listagem, e retorna se o admin é sim ou nao
-
-        this.updateCount()
     }
 
     showPanelCreate() {
-            document.querySelector("#box-user-create").style.display = "block"
-            document.querySelector("#box-user-update").style.display = "none"
+        document.querySelector("#box-user-create").style.display = "block"
+        document.querySelector("#box-user-update").style.display = "none"
     } //mostra o painel de criar usuario e esconde o de edicao
 
     showPanelUpdate() {
