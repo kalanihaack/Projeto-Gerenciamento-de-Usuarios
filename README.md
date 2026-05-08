@@ -1,4 +1,4 @@
-"""# Gerenciamento de Usuários (com persistência via LocalStorage) 👥
+Gerenciamento de Usuários (com persistência via LocalStorage) 👥
 
 Este é um projeto web frontend focado em demonstrar a construção de um painel de gerenciamento de usuários. O projeto utiliza o padrão de arquitetura **MVC (Model, View, Controller)** e garante a persistência de dados diretamente no navegador do cliente através da API nativa do **LocalStorage**.
 
