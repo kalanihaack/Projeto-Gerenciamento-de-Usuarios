@@ -15,10 +15,41 @@ class UserController {
 
             event.preventDefault()
 
-            this.addLine(this.getValues())
+            let values = this.getValues()
+
+            values.photo = ""
+
+            this.getPhoto((content)=>{
+                
+                values.photo = content
+                this.addLine(values)
+                
+            })
+
+
 
         }) //funcao para fazer o click que envia o formulario
 
+    }
+
+    getPhoto(callback){
+
+        let fileReader = new FileReader()
+
+        let elements = Array.from(this.formEl.elements).filter(item=>{
+            
+            if (item.name === "photo") {
+                return item  //obriga a adicao de uma foto
+            }
+        })
+
+        let file = elements[0].files[0]
+
+        fileReader.onload = ()=>{
+            callback(fileReader.result) 
+        }
+        
+        fileReader.readAsDataURL(file) //para nao retornar erro no console
     }
 
     getValues() {
@@ -49,7 +80,7 @@ class UserController {
          this.tableEl.innerHTML =
         `
         <tr>
-                    <td><img src="dist/img/user1-128x128.jpg" alt="User Image" class="img-circle img-sm"></td>
+                    <td><img src="${dataUser.photo}" alt="User Image" class="img-circle img-sm"></td>
                     <td>${dataUser.name}</td>
                     <td>${dataUser.email}</td>
                     <td>${dataUser.admin}</td>
