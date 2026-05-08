@@ -26,7 +26,7 @@ class UserController {
                 values.photo = content
                 this.addLine(values)
                 this.formEl.reset()
-                btn.disabled = false
+                btn.disabled = false //quando faz o envio do formulario, ele limpa os campos e reabilita o botao para submit
                 
 
             }, (e)=>{
@@ -75,22 +75,33 @@ class UserController {
     getValues() {
 
         let user = {}
+        let isValid = true //valida se os valores estao validos
 
         Array.from(this.formEl.elements).forEach(function (field, index) { //usando array.from para substituir o spread (transformar em array)
+
+            if(["name", "email", "password"].indexOf(field.name) > -1 && !field.value) { //obriga o preenchimento de nome, email e senha
+                field.parentElement.classList.add("has-error")
+                isValid = false //se nao passar na validacao, retorna erro e nao deixa avancar
+            }
 
             if (field.name == "gender") {
 
                 if (field.checked) {
-                    user[field.name] = field.value
+                    user[field.name] = field.value //retorna qual genero esta marcado
                 }
 
             } else if (field.name == "admin") {
                 user [field.name] = field.checked
             }else {
-                user[field.name] = field.value
+                user[field.name] = field.value //mostra se a box de admin esta marcada ou nao
             }
 
         })
+
+        if(!isValid){
+            return false
+        }
+
         return new User(user.name, user.gender, user.birth, user.country, user.email, user.password, user.photo, user.admin)
     } // foreach para pegar as informacoes escrita pelo usuario nas boxes
 
